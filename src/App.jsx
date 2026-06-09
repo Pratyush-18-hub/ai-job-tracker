@@ -1,93 +1,132 @@
-import { useState } from "react"
+import { useState } from 'react'
+
 function App(){
-  const[jobs, setjobs] = useState([
+
+  const [jobs, setJobs] = useState([
     { company: "Amazon", role: "SDE Intern", status: "Applied" },
     { company: "Microsoft", role: "SWE Intern", status: "Interview" },
     { company: "Google", role: "SWE Intern", status: "Rejected" },
     { company: "Meta", role: "SWE Intern", status: "Interview" }
   ])
-  const [showForm,setShowForm] = useState(false)
-  const [company,setcompany] = useState('')
-  const [role,setrole]=useState('')
-  const [status,setStatus] = useState('Applied')
 
-  const addjob = ()=>{
-    if (company ===''|| role ==='') return
-    const newjob = {company : company ,role: role,status : status}
-    setjobs([...jobs,newjob])
-    setcompany('')
-    setrole('')
+  const [showForm, setShowForm] = useState(false)
+  const [company, setCompany] = useState('')
+  const [role, setRole] = useState('')
+  const [status, setStatus] = useState('Applied')
+
+  const addJob = () => {
+    if(company === '' || role === '') return
+    const newJob = { company: company, role: role, status: status }
+    setJobs([...jobs, newJob])
+    setCompany('')
+    setRole('')
     setStatus('Applied')
     setShowForm(false)
   }
-  const getstatuscolor = (status)=>{
-    if (status === 'Applied') return 'blue'
-    if (status === 'Interview') return 'purple'
-    if (status === 'Rejected') return 'red'
-  }
-  return (
-    <div>
-      <nav style={{ display : 'flex',justifyContent: 'space-between',padding: '16px',backgroundColor:'#1a1a2e'}}>
-        <h2 style={{color:'white', margin:0}}>AI JOB TRACKER</h2>
-        <button onClick={() => setShowForm(true)}style={{padding: "8px 16px",cursor: 'pointer'}}>ADD JOBS</button>
-        
-      </nav>
-      {showForm &&(
-          <div style={{ background:'#16213e', padding:'24px', margin:'24px', borderRadius:'8px' }}>
-            <h3 style = {{color: 'White',margin: '0 0 16px'}}>Add New Job</h3>
 
-            <input value ={company} onChange={(e) => setcompany(e.target.value)}
-            placeholder='Company Name' style={{ padding:"8px",marginRight:'10px',borderRadius:'4px'}}/>
-            <input
-              value={role}
-              onChange={(e) => setrole(e.target.value)}
-              placeholder="Role"
-              style={{ padding:'8px', marginRight:'10px', borderRadius:'4px' }}
+  const getStatusColor = (status) => {
+    if (status === 'Applied')   return 'bg-blue-500'
+    if (status === 'Interview') return 'bg-purple-500'
+    if (status === 'Offer')     return 'bg-green-500'
+    if (status === 'Rejected')  return 'bg-red-500'
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-950 text-white">
+
+      {/* NAVBAR */}
+      <nav className="flex justify-between items-center px-8 py-4 bg-gray-900 border-b border-gray-800">
+        <h1 className="text-xl font-bold text-white">🎯 AI Job Tracker</h1>
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+          + Add Job
+        </button>
+      </nav>
+
+      <div className="max-w-4xl mx-auto px-6 py-8">
+
+        {/* ADD JOB FORM */}
+        {showForm && (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
+            <h3 className="text-lg font-semibold mb-4">Add New Job</h3>
+            <div className="flex gap-3 flex-wrap">
+              <input
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Company name"
+                className="bg-gray-800 text-white px-4 py-2 rounded-lg flex-1 outline-none"
               />
-              <select value={status}onChange={(e)=>setStatus(e.target.value)} style={{ padding:'8px', marginRight:'10px', borderRadius:'4px' }}>
+              <input
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                placeholder="Role"
+                className="bg-gray-800 text-white px-4 py-2 rounded-lg flex-1 outline-none"
+              />
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="bg-gray-800 text-white px-4 py-2 rounded-lg outline-none">
                 <option value="Applied">Applied</option>
                 <option value="Interview">Interview</option>
                 <option value="Offer">Offer</option>
                 <option value="Rejected">Rejected</option>
               </select>
-            <button onClick={addjob} style ={{padding:'8px',cursor: 'pointer'}}>ADD</button>
-            <button onClick= {()=> setShowForm(false)}
-             style={{padding:'8px 16px', cursor:'pointer', marginLeft:'10px'}}>Cancel</button>
+              <button
+                onClick={addJob}
+                className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg font-medium">
+                Add
+              </button>
+              <button
+                onClick={() => setShowForm(false)}
+                className="bg-gray-700 hover:bg-gray-600 px-6 py-2 rounded-lg font-medium">
+                Cancel
+              </button>
+            </div>
           </div>
         )}
-      <div style={{display:'flex',gap:'16px',padding :'24px'}}>
-        
-        <div style = {{backgroundColor:'#16213e',padding: '20px', borderRadius: '8px',flex:1}}>
-          <p style={{ color: 'gray', margin: 0 }}>Total Applied</p>
-          <h2 style={{ color: 'white', margin: '8px 0 0' }}>{jobs.length}</h2>
-        </div>
-        <div style ={{backgroundColor:'#16213e',padding:'20px',borderRadius:'8px',flex: 1 }}>
-          <p style={{color:"gray", margin:0}}>Interviews</p>
-          <h2 style = {{color: 'white',margin:'8px 0 0'}}>{jobs.filter(job => job.status === 'Interview').length}</h2>
-        </div>
-        <div style = {{ backgroundColor:'#16213e',padding :'20px',borderRadius:'8px',flex:1}}>
-          <p style={{ color:'gray',margin:'0'}}>Offers</p>
-          <h2 style={{color:'gray',margin:'8px 0 0'}}>{jobs.filter(job => job.status === "offer").length}</h2>
-        </div>
-        <div style = {{backgroundColor:'#16213e',padding:"20px",borderRadius:'8px',flex:1}}>
-          <p style={{ color:'gray',margin:'0'}}>Rejected</p>
-          <h2 style={{color:'gray',margin:'8px 0 0'}}>{jobs.filter(job => job.status === "Rejected").length}</h2>
-        </div>
-      </div>
-      <div style={{ margin:'0 24px'}}>
-      <h3 style={{color:'white'}}>My Applications</h3>
 
-      {jobs.map((job, index)=> (
-        <div key ={index} style ={{display: 'flex',justifyContent: 'space-between',alignItems:'center',background:'#16213e',padding:'16px', borderRadius:'8px',marginBottom:'10px'}}>
-        <div>
-          <p style={{ color: 'white', margin: 0, fontWeight: 'bold' }}>{job.company}</p>
-          <p style={{ color: 'gray', margin: '4px 0 0' }}>{job.role}</p>
+        {/* STAT CARDS */}
+        <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <p className="text-gray-400 text-sm">Total Applied</p>
+            <h2 className="text-3xl font-bold mt-1">{jobs.length}</h2>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <p className="text-gray-400 text-sm">Interviews</p>
+            <h2 className="text-3xl font-bold mt-1 text-purple-400">{jobs.filter(job => job.status === 'Interview').length}</h2>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <p className="text-gray-400 text-sm">Offers</p>
+            <h2 className="text-3xl font-bold mt-1 text-green-400">{jobs.filter(job => job.status === 'Offer').length}</h2>
+          </div>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <p className="text-gray-400 text-sm">Rejected</p>
+            <h2 className="text-3xl font-bold mt-1 text-red-400">{jobs.filter(job => job.status === 'Rejected').length}</h2>
+          </div>
         </div>
-        <span style={{ background: getstatuscolor(job.status), color: 'lightblue', padding: '4px 12px', borderRadius: '20px' }}>{job.status}
-        </span>
-      </div>))}
+
+        {/* JOB LIST */}
+        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-800">
+            <h3 className="font-semibold text-lg">My Applications</h3>
+          </div>
+          {jobs.map((job, index) => (
+            <div key={index} className="flex justify-between items-center px-6 py-4 border-b border-gray-800 hover:bg-gray-800 transition">
+              <div>
+                <p className="font-semibold">{job.company}</p>
+                <p className="text-gray-400 text-sm mt-1">{job.role}</p>
+              </div>
+              <span className={`${getStatusColor(job.status)} text-white text-sm px-4 py-1 rounded-full`}>
+                {job.status}
+              </span>
+            </div>
+          ))}
+        </div>
+
       </div>
     </div>
   )
 }
+
 export default App
