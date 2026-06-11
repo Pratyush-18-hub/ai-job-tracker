@@ -1,27 +1,31 @@
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
+import axios from 'axios'
 
 function App(){
 
-  const [jobs, setJobs] = useState([
-    { company: "Amazon", role: "SDE Intern", status: "Applied" },
-    { company: "Microsoft", role: "SWE Intern", status: "Interview" },
-    { company: "Google", role: "SWE Intern", status: "Rejected" },
-    { company: "Meta", role: "SWE Intern", status: "Interview" }
-  ])
+ const [jobs, setJobs] = useState([])
 
   const [showForm, setShowForm] = useState(false)
   const [company, setCompany] = useState('')
   const [role, setRole] = useState('')
   const [status, setStatus] = useState('Applied')
 
+  useEffect(() =>{
+    axios.get('http://127.0.0.1:8000/jobs')
+     .then(response => setJobs(response.data))
+  },[])
+
   const addJob = () => {
     if(company === '' || role === '') return
     const newJob = { company: company, role: role, status: status }
+    axios.post('http://127.0.0.1:8000/jobs',newJob)
+       .then(() => {
     setJobs([...jobs, newJob])
     setCompany('')
     setRole('')
     setStatus('Applied')
     setShowForm(false)
+       })
   }
 
   const getStatusColor = (status) => {
