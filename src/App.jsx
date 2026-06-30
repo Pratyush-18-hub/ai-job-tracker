@@ -21,6 +21,14 @@ function App(){
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
 
+  const[resumeFile,setResumeFile] = useState(null)
+  const[jobDesc,setJobDesc] = useState('')
+  const[analysis,setAnalysis] = useState(null)
+  const[analyzing,setAnalyzing] = useState(false)
+  const[showAnalyzer,setShowAnalyzer] = useState(false)
+
+  const[downloading,setDownloading] = useState(false)
+
   useEffect(() => {
     axios.get('http://127.0.0.1:8000/jobs')
       .then(response => setJobs(response.data))
@@ -79,6 +87,53 @@ function App(){
     if (status === 'Offer')     return 'bg-green-500'
     if (status === 'Rejected')  return 'bg-red-500'
   }
+   const handleAnalyze = async () => {
+      if(!resumeFile || jobDesc === '')return
+      setAnalyzing(true)
+
+      const formData = new FormData()
+      formData.append('resume' ,resumeFile)
+      formData.append('job_description',jobDesc)
+
+      try{
+        const response = await axios.post('http://127.0.0.1:8000/analyze',formData)
+        setAnalysis(response.data)
+      }
+      catch(error){
+        alert('Analysis faild! Try again')
+      }
+      finally{
+        setAnalyzing(false)
+      }
+    }
+   const handleDownload = async () =>{
+    if(!resumeFile || jobDesc === '')return
+
+    setDownloading(true)
+
+    const formData = new FormData()
+    formData.append('resume', resumeFile)
+    formData.append('job_description',jobDesc)
+    formData.append('candidate_name',userName)
+
+    try{
+      const response =  await axios.post('http://127.0.0.1:8000/improve-resume',formData,{responseType:'blob'})
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'improved_resume.pdf')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    }
+    catch(error){
+      alert("Download fail! Try Again.")
+    }
+    finally{
+      setDownloading(false)
+    }
+   }
+  
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -151,13 +206,16 @@ function App(){
 
         <div>
           <nav className="flex justify-between items-center px-8 py-4 bg-gray-900 border-b border-gray-800">
-            <h1 className="text-xl font-bold text-white">🎯 AI Job Tracker</h1>
+            <h1 className="text-xl font-bold text-white"> AI Job Tracker</h1>
             <div className="flex items-center gap-4">
               <span className="text-gray-400 text-sm">Welcome, {userName}!</span>
               <button
                 onClick={() => setShowForm(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
                 + Add Job
+              </button>
+              <button onClick={() => setShowAnalyzer(!showAnalyzer)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium">
+                 AI Analyze
               </button>
               <button
                 onClick={() => setIsLoggedIn(false)}
@@ -227,10 +285,121 @@ function App(){
               </div>
             </div>
 
+            {/* AI ANALYZER SECTION */}
+{showAnalyzer && (
+  <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
+    <h3 className="text-lg font-semibold mb-4">🤖 AI Resume Analyzer</h3>
+
+    <div className="mb-4">
+      <label className="text-gray-400 text-sm mb-2 block">Upload Resume PDF</label>
+      <input
+        type="file"
+        accept=".pdf"
+        onChange={(e) => setResumeFile(e.target.files[0])}
+        className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg outline-none"
+      />
+    </div>
+
+    <div className="mb-4">
+      <label className="text-gray-400 text-sm mb-2 block">Paste Job Description</label>
+      <textarea
+        value={jobDesc}
+        onChange={(e) => setJobDesc(e.target.value)}
+        placeholder="Paste the job description here..."
+        rows={6}
+        className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg outline-none resize-none"
+      />
+    </div>
+
+    <div className="flex gap-3">
+      <button
+        onClick={handleAnalyze}
+        disabled={analyzing}
+        className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-6 py-2 rounded-lg font-medium">
+        {analyzing ? 'Analyzing...' : '🔍 Analyze Resume'}
+      </button>
+      <button
+        onClick={handleDownload}
+        className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg font-medium">
+        {downloading? 'Downloading...': '📄 Download Improved Resume'}
+      </button>
+    </div>
+
+    {analysis && (
+      <div className="mt-6 space-y-4">
+
+        <div className="bg-gray-800 rounded-xl p-5">
+          <p className="text-gray-400 text-sm mb-1">ATS Score</p>
+          <div className="flex items-center gap-4">
+            <h2 className={`text-4xl font-bold ${
+              analysis.ats_score >= 70 ? 'text-green-400' :
+              analysis.ats_score >= 50 ? 'text-yellow-400' : 'text-red-400'
+            }`}>
+              {analysis.ats_score}/100
+            </h2>
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              analysis.ats_score >= 70 ? 'bg-green-900 text-green-300' :
+              analysis.ats_score >= 50 ? 'bg-yellow-900 text-yellow-300' : 'bg-red-900 text-red-300'
+            }`}>
+              {analysis.ats_score >= 70 ? 'Good Match' :
+               analysis.ats_score >= 50 ? 'Moderate Match' : 'Low Match'}
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-gray-800 rounded-xl p-4">
+            <p className="text-gray-400 text-sm">Keyword Match</p>
+            <h3 className="text-2xl font-bold text-blue-400">{analysis.keyword_match}%</h3>
+          </div>
+          <div className="bg-gray-800 rounded-xl p-4">
+            <p className="text-gray-400 text-sm">Skills Match</p>
+            <h3 className="text-2xl font-bold text-purple-400">{analysis.skills_match}%</h3>
+          </div>
+          <div className="bg-gray-800 rounded-xl p-4">
+            <p className="text-gray-400 text-sm">Experience Match</p>
+            <h3 className="text-2xl font-bold text-green-400">{analysis.experience_match}%</h3>
+          </div>
+        </div>
+
+        <div className="bg-gray-800 rounded-xl p-5">
+          <p className="text-gray-400 text-sm mb-3">Missing Skills</p>
+          <div className="flex flex-wrap gap-2">
+            {analysis.missing_skills.map((skill, index) => (
+              <span key={index} className="bg-red-900 text-red-300 px-3 py-1 rounded-full text-sm">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-gray-800 rounded-xl p-5">
+          <p className="text-gray-400 text-sm mb-3">Suggestions</p>
+          {analysis.suggestions.map((suggestion, index) => (
+            <div key={index} className="flex gap-2 mb-2">
+              <span className="text-yellow-400">→</span>
+              <p className="text-gray-300 text-sm">{suggestion}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-gray-800 rounded-xl p-5">
+          <p className="text-gray-400 text-sm mb-2">Overall Summary</p>
+          <p className="text-gray-300 text-sm leading-relaxed">{analysis.summary}</p>
+        </div>
+
+      </div>
+    )}
+  </div>
+)}
+
             <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-800">
                 <h3 className="font-semibold text-lg">My Applications</h3>
               </div>
+
+            
+
               {jobs.map((job, index) => (
                 <div key={index} className="flex justify-between items-center px-6 py-4 border-b border-gray-800 hover:bg-gray-800 transition">
                   <div>
