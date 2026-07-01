@@ -30,14 +30,14 @@ function App(){
   const[downloading,setDownloading] = useState(false)
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/jobs')
+    axios.get('https://ai-job-tracker-backend-production-ab23.up.railway.app/jobs')
       .then(response => setJobs(response.data))
   }, [])
 
   const addJob = () => {
     if(company === '' || role === '') return
     const newJob = { company: company, role: role, status: status }
-    axios.post('http://127.0.0.1:8000/jobs', newJob)
+    axios.post('https://ai-job-tracker-backend-production-ab23.up.railway.app/jobs', newJob)
       .then(() => {
         setJobs([...jobs, newJob])
         setCompany('')
@@ -49,7 +49,7 @@ function App(){
 
   const handleLogin = () => {
     if(loginEmail === '' || loginPassword === '') return
-    axios.post('http://127.0.0.1:8000/login', {
+    axios.post('https://ai-job-tracker-backend-production-ab23.up.railway.app/login', {
       email: loginEmail,
       password: loginPassword
     })
@@ -66,7 +66,7 @@ function App(){
 
   const handleSignup = () => {
     if(signupName === '' || signupEmail === '' || signupPassword === '') return
-    axios.post('http://127.0.0.1:8000/signup', {
+    axios.post('https://ai-job-tracker-backend-production-ab23.up.railway.app/signup', {
       name: signupName,
       email: signupEmail,
       password: signupPassword
@@ -96,7 +96,7 @@ function App(){
       formData.append('job_description',jobDesc)
 
       try{
-        const response = await axios.post('http://127.0.0.1:8000/analyze',formData)
+        const response = await axios.post('https://ai-job-tracker-backend-production-ab23.up.railway.app/analyze',formData)
         setAnalysis(response.data)
       }
       catch(error){
@@ -117,7 +117,7 @@ function App(){
     formData.append('candidate_name',userName)
 
     try{
-      const response =  await axios.post('http://127.0.0.1:8000/improve-resume',formData,{responseType:'blob'})
+      const response =  await axios.post('https://ai-job-tracker-backend-production-ab23.up.railway.app/improve-resume',formData,{responseType:'blob'})
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
