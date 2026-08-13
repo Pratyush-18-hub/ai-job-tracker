@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL
+  || 'https://ai-job-tracker-backend-production-ab23.up.railway.app'
+).replace(/\/$/, '')
+
 function App(){
 
   const [jobs, setJobs] = useState([])
@@ -11,7 +16,6 @@ function App(){
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showSignup, setShowSignup] = useState(false)
-  const [token, setToken] = useState('')
   const [userName, setUserName] = useState('')
 
   const [signupName, setSignupName] = useState('')
@@ -30,14 +34,14 @@ function App(){
   const[downloading,setDownloading] = useState(false)
 
   useEffect(() => {
-    axios.get('https://ai-job-tracker-backend-production-ab23.up.railway.app/jobs')
+    axios.get(`${API_BASE_URL}/jobs`)
       .then(response => setJobs(response.data))
   }, [])
 
   const addJob = () => {
     if(company === '' || role === '') return
     const newJob = { company: company, role: role, status: status }
-    axios.post('https://ai-job-tracker-backend-production-ab23.up.railway.app/jobs', newJob)
+    axios.post(`${API_BASE_URL}/jobs`, newJob)
       .then(() => {
         setJobs([...jobs, newJob])
         setCompany('')
@@ -49,13 +53,12 @@ function App(){
 
   const handleLogin = () => {
     if(loginEmail === '' || loginPassword === '') return
-    axios.post('https://ai-job-tracker-backend-production-ab23.up.railway.app/login', {
+    axios.post(`${API_BASE_URL}/login`, {
       email: loginEmail,
       password: loginPassword
     })
     .then(response => {
       if(response.data.token) {
-        setToken(response.data.token)
         setUserName(response.data.name)
         setIsLoggedIn(true)
       } else {
@@ -66,7 +69,7 @@ function App(){
 
   const handleSignup = () => {
     if(signupName === '' || signupEmail === '' || signupPassword === '') return
-    axios.post('https://ai-job-tracker-backend-production-ab23.up.railway.app/signup', {
+    axios.post(`${API_BASE_URL}/signup`, {
       name: signupName,
       email: signupEmail,
       password: signupPassword
@@ -96,10 +99,10 @@ function App(){
       formData.append('job_description',jobDesc)
 
       try{
-        const response = await axios.post('https://ai-job-tracker-backend-production-ab23.up.railway.app/analyze',formData)
+        const response = await axios.post(`${API_BASE_URL}/analyze`,formData)
         setAnalysis(response.data)
       }
-      catch(error){
+      catch{
         alert('Analysis faild! Try again')
       }
       finally{
@@ -117,7 +120,7 @@ function App(){
     formData.append('candidate_name',userName)
 
     try{
-      const response =  await axios.post('https://ai-job-tracker-backend-production-ab23.up.railway.app/improve-resume',formData,{responseType:'blob'})
+      const response =  await axios.post(`${API_BASE_URL}/improve-resume`,formData,{responseType:'blob'})
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
@@ -126,7 +129,7 @@ function App(){
       link.click()
       link.remove()
     }
-    catch(error){
+    catch{
       alert("Download fail! Try Again.")
     }
     finally{
